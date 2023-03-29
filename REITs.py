@@ -6,14 +6,14 @@ import altair as alt
 import gspread
 from google.oauth2 import service_account
 
-@st.cache_data
+@st.cache_data(ttl=60*60*24)
 def load_vnq_data():
     response = requests.get('https://investor.vanguard.com/investment-products/etfs/profile/api/VNQ/portfolio-holding/stock')
     df = pd.DataFrame(response.json()['fund']['entity'])
     price = float(requests.get('https://investor.vanguard.com/investment-products/etfs/profile/api/VNQ/price').json()['currentPrice']['dailyPrice']['market']['price'])
     return df, price
 
-@st.cache_data
+@st.cache_data(ttl=60*60*24)
 def load_reit_data():
     scope = ['https://www.googleapis.com/auth/drive.readonly']
     credentials = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
@@ -24,7 +24,7 @@ def load_reit_data():
     shares = pd.DataFrame(sh.worksheet('Stock').get_all_records())
     return area, shares
 
-@st.cache_data
+@st.cache_data(ttl=60*60*24)
 def load_data():
     df, price = load_vnq_data()
     area, shares = load_reit_data()
